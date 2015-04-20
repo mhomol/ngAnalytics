@@ -49,6 +49,10 @@
                 link: function ($scope) {
                     ngAnalyticsService.authLabel = $scope.label;
                     $scope.authContainer = $scope.authContainer || 'embed-api-auth-container';
+                    $scope.logout = function () {
+                        ngAnalyticsService.ga.auth.accountLogout();
+                    };
+
                     var watcher = $scope.$watch(function () {
                         return ngAnalyticsService.isReady;
                     }, function (isReady) {
@@ -321,7 +325,7 @@
             });
 
             // put template in template cache
-            $templateCache.put('ngAnalytics-auth/template.html', '<div id="{{authContainer}}" ng-hide="hide"></div>');
+            $templateCache.put('ngAnalytics-auth/template.html', '<div id="{{authContainer}}" ng-hide="hide"></div><div ng-hide="hide" ng-click="logout()">Logout</div>');
             $templateCache.put('ngAnalytics-chart/template.html', '<div id="{{chart.chart.container}}"></div>');
             $templateCache.put('ngAnalytics-view/template.html', '<div id="{{viewSelectorContainer}}"></div>');
         }
