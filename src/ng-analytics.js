@@ -7,7 +7,8 @@
 
     // service to hold viewSelectors, getter, setters, helper
     app.service('ngAnalyticsService', [
-        function () {
+        '$timeout',
+        function ($timeout) {
             var clientId;
 
             this.ga = null;
@@ -22,11 +23,15 @@
             };
 
             this.authorize = function (container) {
-                this.ga.auth.authorize({
-                    container: container,
-                    clientid: clientId,
-                    userInfoLabel: this.authLabel
-                });
+                var self = this;
+
+                $timeout(function () {
+                    self.ga.auth.authorize({
+                        container: container,
+                        clientid: clientId,
+                        userInfoLabel: self.authLabel
+                    });
+                }, 0);
             };
             this.viewSelectors = {};
             this.isReady = false;
@@ -137,10 +142,15 @@
                                     }
                                 });
                             } else {
-                                ngAnalyticsService.ga.auth.once('success', function () {
+                                var callback = function () {
                                     // Render the view selector to the page.
                                     chart.execute();
-                                });
+                                };
+
+                                ngAnalyticsService.ga.auth.once('success', callback);
+                                if (ngAnalyticsService.ga.auth.isAuthorized()) {
+                                    callback();
+                                }
                             }
 
                             // clear watcher;
@@ -201,7 +211,7 @@
                             }
                             // without viewSelector connection
                             if (!$scope.viewSelectorContainer) {
-                                ngAnalyticsService.ga.auth.once('success', function () {
+                                var callback = function () {
                                     // Send report request.
                                     /**
                                     * Create report
@@ -217,7 +227,12 @@
                                         $scope.error = response;
                                         $rootScope.$broadcast('$gaReportError', response, element);
                                     });
-                                });
+                                };
+
+                                ngAnalyticsService.ga.auth.once('success', callback);
+                                if (ngAnalyticsService.ga.auth.isAuthorized()) {
+                                    callback();
+                                }
                             } else { // with viewSelector connection
                                 var viewWatcher = $scope.$watch(function () {
                                     return ngAnalyticsService.viewSelectors[$scope.viewSelectorContainer];
@@ -292,10 +307,15 @@
                             /* store created view in service */
                             ngAnalyticsService.viewSelectors[$scope.viewSelectorContainer] = viewSelector;
 
-                            ngAnalyticsService.ga.auth.once('success', function () {
+                            var callback = function () {
                                 // Render the view selector to the page.
                                 viewSelector.execute();
-                            });
+                            };
+
+                            ngAnalyticsService.ga.auth.once('success', callback);
+                            if (ngAnalyticsService.ga.auth.isAuthorized()) {
+                                callback();
+                            }
                         }
                     });
                 }
