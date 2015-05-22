@@ -7,8 +7,8 @@
 
     // service to hold viewSelectors, getter, setters, helper
     app.service('ngAnalyticsService', [
-        '$timeout',
-        function ($timeout) {
+        '$timeout', '$rootScope',
+        function ($timeout, $rootScope) {
             var clientId;
 
             this.ga = null;
@@ -37,6 +37,10 @@
             this.isReady = false;
             this.authLabel = undefined;
             this.authorized = false;
+
+            this.updateGlobalView = function (vid) {
+                $rootScope.$broadcast('GlobalViewId:updated', vid);
+            };
         }
     ]);
 
@@ -152,6 +156,33 @@
 
                             // clear watcher;
                             watcher();
+                        }
+                    });
+                },
+                controller: function ($scope, ngAnalyticsService) {
+                    $scope.api = ngAnalyticsService;
+                    $scope.$on('GlobalViewId:updated', function(event, vid) {
+                        if (vid != null) {
+                            /**
+                             * Update with new vid
+                             */
+                            $scope.chart.query.ids = 'ga:' + vid;
+                            console.log($scope.chart);
+
+                            /**
+                             * Create chart
+                             */
+                            var chart = new $scope.api.ga.googleCharts.DataChart($scope.chart);
+
+                            var callback = function () {
+                                // Render the view selector to the page.
+                                chart.execute();
+                            };
+
+                            ngAnalyticsService.ga.auth.once('success', callback);
+                            if (ngAnalyticsService.ga.auth.isAuthorized()) {
+                                callback();
+                            }
                         }
                     });
                 }

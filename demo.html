@@ -16,22 +16,24 @@
             // declare a module and load ngAnalytics
             var myAppModule = angular.module('gaTest', ['ngAnalytics']);
             myAppModule.run(['ngAnalyticsService', function (ngAnalyticsService) {
-                ngAnalyticsService.setClientId('CLIENT_ID');
+                ngAnalyticsService.setClientId('406286336506-beeb40i79j6kcg8qj6n54g8tua7cja8o.apps.googleusercontent.com');
             }]);
-            myAppModule.controller('MainCtrl', function ($scope) {
+            myAppModule.controller('MainCtrl', function ($scope, ngAnalyticsService) {
                 $scope.charts = [{
                     reportType: 'ga',
                     query: {
                         metrics: 'ga:sessions',
                         dimensions: 'ga:date',
                         'start-date': '30daysAgo',
-                        'end-date': 'yesterday'
+                        'end-date': 'yesterday',
+                        ids: 'ga:11858939'
                     },
                     chart: {
                         container: 'chart-container-1',
                         type: 'LINE',
                         options: {
-                            width: '100%'
+                            width: '100%',
+                            title: '30 Day Sessions'
                         }
                     }
                 }, {
@@ -40,7 +42,8 @@
                         metrics: 'ga:sessions',
                         dimensions: 'ga:browser',
                         'start-date': '30daysAgo',
-                        'end-date': 'yesterday'
+                        'end-date': 'yesterday',
+                        ids: 'ga:11858939'
                     },
                     chart: {
                         container: 'chart-container-2',
@@ -60,7 +63,7 @@
                         dimensions: 'ga:date',
                         'start-date': '30daysAgo',
                         'end-date': 'yesterday',
-                        ids: 'ga:81197147' // put your viewID here
+                        ids: 'ga:11858939' // put your viewID here
                     },
                     chart: {
                         container: 'chart-container-3',
@@ -83,10 +86,17 @@
                 $scope.$on('$gaReportSuccess', function (e, report, element) {
                     console.log(report, element);
                 });
+
+                $scope.changeVid = function(vid) {
+                    //$scope.extraChart.query.ids = 'ga:' + vid;
+                    //console.log($scope.extraChart);
+                    ngAnalyticsService.updateGlobalView(vid);
+                };
             });
         </script>
     </head>
     <body ng-controller="MainCtrl">
+        <button ng-click="changeVid('41088999')">New VID</button>
         <div>
             <ng-analytics-auth label="Hallo:&nbsp;" hide-on-auth="true" auth-container="embed-api-auth-container"></ng-analytics-auth>
             <ng-analytics-view view-selector-container="view-selector-container" auth-container="embed-api-auth-container"></ng-analytics-view>
